@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Bingo</title>
+
+<style>
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    text-align: center;
+    background: #0f172a;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+  }
+
+  h1 {
+    margin-bottom: 10px;
+  }
+
+  #controls {
+    margin-bottom: 20px;
+  }
+
+  button {
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  #startBtn {
+    padding: 12px 22px;
+    font-size: 16px;
+    background: #22c55e;
+    color: #022c22;
+  }
+
+  #stopBtn {
+    padding: 12px 22px;
+    font-size: 16px;
+    background: #ef4444;
+    color: #fff;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  #currentNumber {
+    font-size: 96px;
+    font-weight: 900;
+    margin: 20px 0;
+    color: #22c55e;
+  }
+
+  #bingoBoard {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 8px;
+    max-width: 900px;
+    margin: 20px auto;
+  }
+
+  .number {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 14px 0;
+    font-size: 18px;
+    transition: all 0.2s ease;
+  }
+
+  .number.active {
+    background: #22c55e;
+    color: #022c22;
+    transform: scale(1.1);
+  }
+
+  #drawBtn {
+    width: 100%;
+    max-width: 900px;
+    margin: 30px auto 0;
+    padding: 28px;
+    font-size: 36px;
+    background: #38bdf8;
+    color: #022c22;
+    display: block;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Bingo</h1>
+
+<div id="controls">
+  <button id="startBtn">Começar</button>
+  <button id="stopBtn" disabled>Acabar</button>
+</div>
+
+<div id="currentNumber">—</div>
+
+<div id="bingoBoard"></div>
+
+<button id="drawBtn" disabled>SORTEAR NÚMERO</button>
+
+<script>
+  const board = document.getElementById("bingoBoard");
+  const startBtn = document.getElementById("startBtn");
+  const stopBtn  = document.getElementById("stopBtn");
+  const drawBtn  = document.getElementById("drawBtn");
+  const current  = document.getElementById("currentNumber");
+
+  let numbers = [];
+  let started = false;
+
+  /* Inicializar / Reset */
+  function resetGame() {
+    numbers = [];
+    current.textContent = "—";
+
+    document.querySelectorAll(".number").forEach(cell => {
+      cell.classList.remove("active");
+    });
+
+    for (let i = 1; i <= 90; i++) {
+      numbers.push(i);
+    }
+  }
+
+  /* Criar grelha */
+  for (let i = 1; i <= 90; i++) {
+    const div = document.createElement("div");
+    div.className = "number";
+    div.textContent = i;
+    div.dataset.number = i;
+    board.appendChild(div);
+  }
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  /* Começar */
+  startBtn.addEventListener("click", () => {
+    resetGame();
+    shuffle(numbers);
+
+    started = true;
+    startBtn.disabled = true;
+    stopBtn.disabled  = false;
+    drawBtn.disabled  = false;
+  });
+
+  /* Acabar */
+  stopBtn.addEventListener("click", () => {
+    started = false;
+    resetGame();
+
+    startBtn.disabled = false;
+    stopBtn.disabled  = true;
+    drawBtn.disabled  = true;
+  });
+
+  /* Sortear número */
+  drawBtn.addEventListener("click", () => {
+    if (!started || !numbers.length) {
+      alert("O bingo terminou!");
+      return;
+    }
+
+    const number = numbers.pop();
+    current.textContent = number;
+
+    const cell = document.querySelector(
+      `.number[data-number="${number}"]`
+    );
+    cell.classList.add("active");
+  });
+
+  /* Estado inicial */
+  resetGame();
+</script>
+
+<script>
+  /* Ativar sorteio com tecla Espaço */
+  document.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+      e.preventDefault();
+
+      if (!drawBtn.disabled) {
+        drawBtn.click();
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
